@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, User, GraduationCap } from 'lucide-react';
+import { Search, User, GraduationCap, Users } from 'lucide-react';
 import {
   SidebarProvider,
   Sidebar,
@@ -14,7 +14,6 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -40,6 +39,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <div className="flex items-center gap-2">
                     <Search />
                     <span>Resource Finder</span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === '/clubs'}
+                tooltip="Club Finder"
+              >
+                <Link href="/clubs">
+                  <div className="flex items-center gap-2">
+                    <Users />
+                    <span>Club Finder</span>
                   </div>
                 </Link>
               </SidebarMenuButton>
