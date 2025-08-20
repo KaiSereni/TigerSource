@@ -262,8 +262,9 @@ Sidebar.displayName = "Sidebar"
 const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
->(({ className, onClick, ...props }, ref) => {
+>(({ className, children, onClick, ...props }, ref) => {
   const { toggleSidebar } = useSidebar()
+  const hasChildren = React.Children.count(children) > 0;
 
   return (
     <Button
@@ -278,12 +279,13 @@ const SidebarTrigger = React.forwardRef<
       }}
       {...props}
     >
-      <PanelLeft />
+      {hasChildren ? children : <PanelLeft />}
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
 })
 SidebarTrigger.displayName = "SidebarTrigger"
+
 
 const SidebarRail = React.forwardRef<
   HTMLButtonElement,
