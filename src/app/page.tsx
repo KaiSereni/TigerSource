@@ -232,7 +232,7 @@ export default function TigerSourcePage() {
              </Alert>
           )}
 
-          {result && (
+          {result && !loading && (
             <>
               <Card>
                 <CardHeader>
@@ -246,6 +246,43 @@ export default function TigerSourcePage() {
                     </a>
                   </Button>
                 </CardFooter>
+              </Card>
+
+              <Card>
+                <Collapsible open={isSuggestionOpen} onOpenChange={setIsSuggestionOpen}>
+                  <CardHeader>
+                    <CardTitle>Don't see what you're looking for?</CardTitle>
+                     <CollapsibleTrigger asChild>
+                       <Button variant="outline" className="mt-2 w-full sm:w-auto">
+                         <PlusCircle className="mr-2 h-4 w-4" />
+                         Suggest a resource
+                       </Button>
+                     </CollapsibleTrigger>
+                  </CardHeader>
+                   <CollapsibleContent>
+                      <form onSubmit={handleSuggestionSubmit}>
+                        <CardContent className="space-y-4">
+                           <div className="space-y-2">
+                             <Label htmlFor="suggestion-name">Resource Name</Label>
+                             <Input id="suggestion-name" placeholder="e.g., RIT Tech Crew" value={suggestionName} onChange={(e) => setSuggestionName(e.target.value)} />
+                           </div>
+                           <div className="space-y-2">
+                             <Label htmlFor="suggestion-link">Resource Link</Label>
+                             <Input id="suggestion-link" placeholder="https://example.rit.edu" value={suggestionLink} onChange={(e) => setSuggestionLink(e.target.value)} />
+                           </div>
+                           <div className="space-y-2">
+                             <Label htmlFor="suggestion-description">Description</Label>
+                             <Textarea id="suggestion-description" placeholder="A brief description of what this resource is for." value={suggestionDescription} onChange={(e) => setSuggestionDescription(e.target.value)} />
+                           </div>
+                        </CardContent>
+                        <CardFooter>
+                          <Button type="submit" className="ml-auto">
+                            Submit Suggestion
+                          </Button>
+                        </CardFooter>
+                      </form>
+                   </CollapsibleContent>
+                </Collapsible>
               </Card>
 
               <Card>
@@ -280,44 +317,6 @@ export default function TigerSourcePage() {
             </>
           )}
 
-          {result && !loading && (
-            <Card>
-              <Collapsible open={isSuggestionOpen} onOpenChange={setIsSuggestionOpen}>
-                <CardHeader>
-                  <CardTitle>Don't see what you're looking for?</CardTitle>
-                   <CollapsibleTrigger asChild>
-                     <Button variant="outline" className="mt-2 w-full sm:w-auto">
-                       <PlusCircle className="mr-2 h-4 w-4" />
-                       Suggest a resource
-                     </Button>
-                   </CollapsibleTrigger>
-                </CardHeader>
-                 <CollapsibleContent>
-                    <form onSubmit={handleSuggestionSubmit}>
-                      <CardContent className="space-y-4">
-                         <div className="space-y-2">
-                           <Label htmlFor="suggestion-name">Resource Name</Label>
-                           <Input id="suggestion-name" placeholder="e.g., RIT Tech Crew" value={suggestionName} onChange={(e) => setSuggestionName(e.target.value)} />
-                         </div>
-                         <div className="space-y-2">
-                           <Label htmlFor="suggestion-link">Resource Link</Label>
-                           <Input id="suggestion-link" placeholder="https://example.rit.edu" value={suggestionLink} onChange={(e) => setSuggestionLink(e.target.value)} />
-                         </div>
-                         <div className="space-y-2">
-                           <Label htmlFor="suggestion-description">Description</Label>
-                           <Textarea id="suggestion-description" placeholder="A brief description of what this resource is for." value={suggestionDescription} onChange={(e) => setSuggestionDescription(e.target.value)} />
-                         </div>
-                      </CardContent>
-                      <CardFooter>
-                        <Button type="submit" className="ml-auto">
-                          Submit Suggestion
-                        </Button>
-                      </CardFooter>
-                    </form>
-                 </CollapsibleContent>
-              </Collapsible>
-            </Card>
-          )}
         </div>
       </main>
     </div>
