@@ -1,21 +1,22 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { GraduationCap, Search, Star, Send, ExternalLink, Loader2 } from 'lucide-react';
+import { Search, Star, Send, ExternalLink, Loader2, GraduationCap } from 'lucide-react';
 
-import type { ResourceFinderInput, ResourceFinderOutput } from '@/ai/flows/resource-finder';
+import type { ResourceFinderOutput } from '@/ai/flows/resource-finder';
 import type { ImproveSearchInput } from '@/ai/flows/improve-search';
 import { findResourceAction, submitFeedbackAction } from './actions';
+import { useProfile } from '@/hooks/use-profile';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 const StarRating = ({ rating, setRating }: { rating: number; setRating: (rating: number) => void; }) => {
   return (
@@ -42,12 +43,8 @@ const StarRating = ({ rating, setRating }: { rating: number; setRating: (rating:
 
 export default function TigerSourcePage() {
   const { toast } = useToast();
+  const { profile, isProfileLoaded } = useProfile();
 
-  const [profile, setProfile] = useState<Omit<ResourceFinderInput, 'query'>>({
-    degreeProgram: '',
-    year: '',
-    interests: '',
-  });
   const [query, setQuery] = useState('');
   
   const [loading, setLoading] = useState(false);
@@ -62,6 +59,10 @@ export default function TigerSourcePage() {
     e.preventDefault();
     if (!query) {
       setError('Please enter a search query.');
+      return;
+    }
+     if (!profile.degreeProgram && !profile.year && !profile.interests) {
+      setError('Please complete your profile before searching for resources.');
       return;
     }
 
@@ -117,53 +118,38 @@ export default function TigerSourcePage() {
       });
     }
   };
+  
+  if (!isProfileLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center p-4 sm:p-6 md:p-8">
-      <header className="w-full max-w-4xl mb-8 text-center">
+       <header className="w-full max-w-4xl mb-8 text-center">
         <div className="flex items-center justify-center gap-4 mb-2">
           <GraduationCap className="h-10 w-10 text-primary" />
           <h1 className="text-4xl md:text-5xl font-bold text-primary tracking-tight">TigerSource</h1>
         </div>
-        <p className="text-lg text-foreground/80">Your AI-powered guide to RIT resources. Tell us who you are and what you're looking for.</p>
+        <p className="text-lg text-foreground/80">Your AI-powered guide to RIT resources.</p>
+        {!profile.degreeProgram && !profile.year && !profile.interests && (
+          <Alert className="mt-4 text-left">
+            <AlertTitle>Welcome!</AlertTitle>
+            <AlertDescription>
+              It looks like your profile is empty. Please{' '}
+              <Link href="/profile" className="font-semibold text-primary hover:underline">
+                fill out your profile
+              </Link>{' '}
+              to get personalized resource recommendations.
+            </AlertDescription>
+          </Alert>
+        )}
       </header>
-      
-      <main className="w-full max-w-4xl space-y-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Profile</CardTitle>
-            <CardDescription>Providing some context helps us find better results for you.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="degree">Degree Program</Label>
-                <Input id="degree" placeholder="e.g., Software Engineering" value={profile.degreeProgram} onChange={(e) => setProfile({...profile, degreeProgram: e.target.value})} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="year">Year</Label>
-                <Select value={profile.year} onValueChange={(value) => setProfile({...profile, year: value})}>
-                  <SelectTrigger id="year">
-                    <SelectValue placeholder="Select your year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="First Year">First Year</SelectItem>
-                    <SelectItem value="Second Year">Second Year</SelectItem>
-                    <SelectItem value="Third Year">Third Year</SelectItem>
-                    <SelectItem value="Fourth Year">Fourth Year</SelectItem>
-                    <SelectItem value="Fifth Year+">Fifth Year+</SelectItem>
-                    <SelectItem value="Graduate Student">Graduate Student</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="interests">Specific Interests</Label>
-                <Textarea id="interests" placeholder="e.g., Cybersecurity, rock climbing, student government" value={profile.interests} onChange={(e) => setProfile({...profile, interests: e.target.value})} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
+      <main className="w-full max-w-4xl space-y-8">
         <Card>
           <CardHeader>
             <CardTitle>Resource Finder</CardTitle>
