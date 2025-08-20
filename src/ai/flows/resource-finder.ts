@@ -1,4 +1,3 @@
-// ResourceFinder flow
 'use server';
 
 /**
@@ -11,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { allResources } from '@/lib/data';
 
 const ResourceFinderInputSchema = z.object({
   query: z.string().describe('The user query to find RIT resources.'),
@@ -43,10 +43,9 @@ const resourceFinderPrompt = ai.definePrompt({
   Interests: {{{interests}}}
 
   Consider the following RIT resources:
-  - My RIT: https://my.rit.edu, A personalized dashboard for accessing RIT resources.
-  - SIS: https://sis.rit.edu, The Student Information System for managing academic records.
-  - StarRez: https://starrez.rit.edu, The housing portal for on-campus living.
-  - CampusGroups: https://campusgroups.rit.edu, A platform for finding clubs and campus events.
+  {{#each resources}}
+  - {{name}}: {{link}}, {{description}}
+  {{/each}}
 
   Based on the user query and profile information, determine the best RIT resource for the user.
   `,
@@ -59,7 +58,10 @@ const resourceFinderFlow = ai.defineFlow(
     outputSchema: ResourceFinderOutputSchema,
   },
   async input => {
-    const {output} = await resourceFinderPrompt(input);
+    const {output} = await resourceFinderPrompt({
+        ...input,
+        resources: allResources,
+    });
     return output!;
   }
 );
