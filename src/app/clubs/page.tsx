@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Users, RotateCw, List, ArrowRight } from 'lucide-react';
+import { Users, RotateCw, List, ArrowRight, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Club } from '@/lib/data';
 import { allClubs } from '@/lib/data';
+import { generateClubQuestionAction, filterClubsAction } from '../actions';
+import { useToast } from '@/hooks/use-toast';
 
 type Question = {
   id: string;
@@ -18,7 +20,12 @@ type Question = {
   options: { value: string; label: string }[];
 };
 
-const questions: Question[] = [
+type HistoryItem = {
+    question: string;
+    answers: string[];
+}
+
+const defaultQuestions: Question[] = [
   {
     id: 'interest_type',
     text: 'What kind of activities are you looking for? (Select one or more)',
@@ -39,81 +46,117 @@ const questions: Question[] = [
       { value: 'social', label: 'Casual and social' },
     ],
   },
-    {
-    id: 'primary_goal',
-    text: 'What is your main goal for joining a club? (Select one or more)',
-    options: [
-      { value: 'leadership', label: 'Develop leadership skills' },
-      { value: 'service', label: 'Engage in community service' },
-      { value: 'cultural', label: 'Explore different cultures' },
-      { value: 'hobby', label: 'Pursue a personal hobby' },
-    ],
-  },
-  {
-    id: 'specific_interest',
-    text: 'Which of these sounds most interesting? (Select one or more)',
-    options: [
-        { value: 'gaming', label: 'Gaming (video games, board games, etc.)' },
-        { value: 'performing arts', label: 'Performing Arts (music, theater)' },
-        { value: 'sports', label: 'Competitive or recreational sports' },
-        { value: 'creative', label: 'Making things (art, photos, films)' },
-    ]
-  }
 ];
 
 export default function ClubFinderPage() {
-  const [filteredClubs, setFilteredClubs] = useState<Club[]>(allClubs);
+  const { toast } = useToast();
+  const [clubs, setClubs] = useState<Club[]>(allClubs);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [questions, setQuestions] = useState<Question[]>(defaultQuestions);
   const [quizFinished, setQuizFinished] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const currentQuestion = !quizFinished ? questions[currentQuestionIndex] : null;
 
   useEffect(() => {
-    if (!quizFinished && filteredClubs.length > 0 && filteredClubs.length < 16) {
+    if (quizFinished) return;
+    
+    if (clubs.length < 16 && clubs.length > 0) {
       setQuizFinished(true);
+      return;
     }
-  }, [filteredClubs, quizFinished]);
 
-  const handleSelectionChange = (tag: string) => {
+    if (currentQuestionIndex >= defaultQuestions.length) {
+        generateNextQuestion();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentQuestionIndex, clubs, quizFinished]);
+
+  const generateNextQuestion = async () => {
+    setLoading(true);
+    const response = await generateClubQuestionAction({ clubs, history });
+    if (response.success && response.data) {
+      const newQuestion: Question = {
+        id: `ai-q-${questions.length}`,
+        text: response.data.questionText,
+        options: response.data.options,
+      };
+      setQuestions(prev => [...prev, newQuestion]);
+    } else {
+      toast({
+        title: 'Error generating question',
+        description: response.error,
+        variant: 'destructive',
+      });
+      setQuizFinished(true); // End quiz if we can't generate a question
+    }
+    setLoading(false);
+  };
+
+  const handleSelectionChange = (value: string) => {
     setSelectedAnswers(prev => 
-      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+      prev.includes(value) ? prev.filter(t => t !== value) : [...prev, value]
     );
   };
 
-  const handleNextQuestion = () => {
-    if (selectedAnswers.length > 0) {
-      const newFilteredClubs = filteredClubs.filter(club => 
-        selectedAnswers.some(tag => club.tags.includes(tag))
-      );
-      setFilteredClubs(newFilteredClubs.length > 0 ? newFilteredClubs : filteredClubs);
-    }
-    
-    setSelectedAnswers([]);
+  const handleNextQuestion = async () => {
+    if (!currentQuestion) return;
+    setLoading(true);
 
-    if (currentQuestionIndex + 1 < questions.length) {
+    const currentHistoryItem: HistoryItem = {
+        question: currentQuestion.text,
+        answers: selectedAnswers,
+    };
+
+    const response = await filterClubsAction({
+        clubs,
+        question: currentQuestion.text,
+        answers: selectedAnswers,
+    });
+
+    setHistory(prev => [...prev, currentHistoryItem]);
+
+    if(response.success && response.data) {
+        setClubs(response.data);
+    } else {
+        toast({
+            title: 'Error filtering clubs',
+            description: response.error,
+            variant: 'destructive',
+        });
+    }
+
+    setSelectedAnswers([]);
+    
+    if (currentQuestionIndex + 1 < questions.length || clubs.length >= 16) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
       setQuizFinished(true);
     }
+    setLoading(false);
   };
 
   const resetQuiz = () => {
-    setFilteredClubs(allClubs);
+    setClubs(allClubs);
     setCurrentQuestionIndex(0);
+    setQuestions(defaultQuestions);
     setQuizFinished(false);
     setShowAll(false);
     setSelectedAnswers([]);
+    setHistory([]);
+    setLoading(false);
   };
 
   const handleShowAll = () => {
-    setFilteredClubs(allClubs);
+    setClubs(allClubs);
     setShowAll(true);
     setQuizFinished(true);
   };
   
-  const clubsToShow = showAll ? allClubs : filteredClubs;
+  const clubsToShow = showAll ? allClubs : clubs;
 
   return (
     <div className="min-h-screen flex flex-col items-center p-4 sm:p-6 md:p-8">
@@ -129,29 +172,39 @@ export default function ClubFinderPage() {
         {!quizFinished && currentQuestion && (
           <Card>
             <CardHeader>
-              <CardTitle>Question {currentQuestionIndex + 1} of {questions.length}</CardTitle>
+              <CardTitle>Question {currentQuestionIndex + 1}</CardTitle>
               <CardDescription>{currentQuestion.text}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {currentQuestion.options.map(option => (
-                  <div key={option.value} className="flex items-center space-x-3">
-                    <Checkbox
-                      id={option.value}
-                      checked={selectedAnswers.includes(option.value)}
-                      onCheckedChange={() => handleSelectionChange(option.value)}
-                    />
-                    <Label htmlFor={option.value} className="text-base font-normal cursor-pointer">
-                      {option.label}
-                    </Label>
+              {loading && currentQuestionIndex >= defaultQuestions.length ? (
+                 <div className="flex items-center justify-center p-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="ml-4 text-muted-foreground">Generating question...</p>
+                 </div>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    {currentQuestion.options.map(option => (
+                      <div key={option.value} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={option.value}
+                          checked={selectedAnswers.includes(option.value)}
+                          onCheckedChange={() => handleSelectionChange(option.value)}
+                        />
+                        <Label htmlFor={option.value} className="text-base font-normal cursor-pointer">
+                          {option.label}
+                        </Label>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div className="flex justify-end mt-6">
-                <Button onClick={handleNextQuestion} disabled={selectedAnswers.length === 0}>
-                  Next <ArrowRight className="ml-2" />
-                </Button>
-              </div>
+                  <div className="flex justify-end mt-6">
+                    <Button onClick={handleNextQuestion} disabled={selectedAnswers.length === 0 || loading}>
+                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {loading ? 'Filtering...' : <>Next <ArrowRight className="ml-2" /></>}
+                    </Button>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         )}
