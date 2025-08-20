@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { Search, Star, Send, ExternalLink, Loader2, GraduationCap } from 'lucide-react';
+import { Search, Star, Send, ExternalLink, Loader2, GraduationCap, PlusCircle } from 'lucide-react';
 
 import type { ResourceFinderOutput } from '@/ai/flows/resource-finder';
 import type { ImproveSearchInput } from '@/ai/flows/improve-search';
@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const StarRating = ({ rating, setRating }: { rating: number; setRating: (rating: number) => void; }) => {
   return (
@@ -54,6 +55,11 @@ export default function TigerSourcePage() {
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackRating, setFeedbackRating] = useState(0);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  
+  const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
+  const [suggestionName, setSuggestionName] = useState('');
+  const [suggestionLink, setSuggestionLink] = useState('');
+  const [suggestionDescription, setSuggestionDescription] = useState('');
 
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
@@ -119,6 +125,36 @@ export default function TigerSourcePage() {
     }
   };
   
+  const handleSuggestionSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!suggestionName || !suggestionLink || !suggestionDescription) {
+      toast({
+        title: 'All fields required',
+        description: 'Please fill out all fields to suggest a resource.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    // In a real application, you would send this data to a backend.
+    // For now, we'll just log it and show a success message.
+    console.log('New resource suggestion:', {
+      name: suggestionName,
+      link: suggestionLink,
+      description: suggestionDescription,
+    });
+    
+    toast({
+      title: 'Suggestion Submitted',
+      description: 'Thank you! We will review your suggestion.',
+    });
+
+    // Reset form
+    setSuggestionName('');
+    setSuggestionLink('');
+    setSuggestionDescription('');
+    setIsSuggestionOpen(false);
+  };
+
   if (!isProfileLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -242,6 +278,45 @@ export default function TigerSourcePage() {
                 )}
               </Card>
             </>
+          )}
+
+          {result && !loading && (
+            <Card>
+              <Collapsible open={isSuggestionOpen} onOpenChange={setIsSuggestionOpen}>
+                <CardHeader>
+                  <CardTitle>Don't see what you're looking for?</CardTitle>
+                   <CollapsibleTrigger asChild>
+                     <Button variant="outline" className="mt-2 w-full sm:w-auto">
+                       <PlusCircle className="mr-2 h-4 w-4" />
+                       Suggest a resource
+                     </Button>
+                   </CollapsibleTrigger>
+                </CardHeader>
+                 <CollapsibleContent>
+                    <form onSubmit={handleSuggestionSubmit}>
+                      <CardContent className="space-y-4">
+                         <div className="space-y-2">
+                           <Label htmlFor="suggestion-name">Resource Name</Label>
+                           <Input id="suggestion-name" placeholder="e.g., RIT Tech Crew" value={suggestionName} onChange={(e) => setSuggestionName(e.target.value)} />
+                         </div>
+                         <div className="space-y-2">
+                           <Label htmlFor="suggestion-link">Resource Link</Label>
+                           <Input id="suggestion-link" placeholder="https://example.rit.edu" value={suggestionLink} onChange={(e) => setSuggestionLink(e.target.value)} />
+                         </div>
+                         <div className="space-y-2">
+                           <Label htmlFor="suggestion-description">Description</Label>
+                           <Textarea id="suggestion-description" placeholder="A brief description of what this resource is for." value={suggestionDescription} onChange={(e) => setSuggestionDescription(e.target.value)} />
+                         </div>
+                      </CardContent>
+                      <CardFooter>
+                        <Button type="submit" className="ml-auto">
+                          Submit Suggestion
+                        </Button>
+                      </CardFooter>
+                    </form>
+                 </CollapsibleContent>
+              </Collapsible>
+            </Card>
           )}
         </div>
       </main>
