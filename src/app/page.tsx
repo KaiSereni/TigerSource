@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { Search, Star, Send, ExternalLink, Loader2, GraduationCap, PlusCircle } from 'lucide-react';
+import { Search, Star, Send, ExternalLink, Loader2, PlusCircle } from 'lucide-react';
+import tiger from "@/assets/Roaring Tiger_rgb.png"
 
 import type { ResourceFinderOutput } from '@/ai/flows/resource-finder';
 import type { ImproveSearchInput } from '@/ai/flows/improve-search';
@@ -81,10 +82,10 @@ export default function TigerSourcePage() {
 
     const response = await findResourceAction({ ...profile, query });
 
-    if (response.success) {
+    if (response.data && response.success) {
       setResult(response.data);
     } else {
-      setError(response.error);
+      setError(response.error || "Error");
     }
     setLoading(false);
   };
@@ -167,7 +168,7 @@ export default function TigerSourcePage() {
     <div className="min-h-screen flex flex-col items-center p-4 sm:p-6 md:p-8">
        <header className="w-full max-w-4xl mb-8 text-center">
         <div className="flex items-center justify-center gap-4 mb-2">
-          <GraduationCap className="h-10 w-10 text-primary" />
+          <img src={tiger.src} className="h-10 w-10 text-primary" />
           <h1 className="text-4xl md:text-5xl font-bold text-primary tracking-tight">TigerSource</h1>
         </div>
         <p className="text-lg text-foreground/80">Your AI-powered guide to RIT resources.</p>

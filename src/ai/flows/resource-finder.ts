@@ -61,7 +61,7 @@ const resourceFinderFlow = ai.defineFlow(
     const {output} = await resourceFinderPrompt({
         ...input,
         resources: allResources,
-    });
+    } as any);
     return output!;
   }
 );

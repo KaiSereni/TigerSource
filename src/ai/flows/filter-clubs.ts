@@ -13,7 +13,7 @@ import { z } from 'genkit';
 const ClubSchema = z.object({
     name: z.string(),
     description: z.string(),
-    tags: z.array(z.string()),
+    id: z.string(),
 });
 
 const FilterClubsInputSchema = z.object({

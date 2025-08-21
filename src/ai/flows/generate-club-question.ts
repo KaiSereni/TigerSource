@@ -20,7 +20,7 @@ const HistoryItemSchema = z.object({
 const ClubSchema = z.object({
     name: z.string(),
     description: z.string(),
-    tags: z.array(z.string()),
+    id: z.string(),
 });
 
 const GenerateClubQuestionInputSchema = z.object({

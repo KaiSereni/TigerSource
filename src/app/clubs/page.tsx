@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Users, RotateCw, List, ArrowRight, Loader2 } from 'lucide-react';
+import { Users, RotateCw, List, ArrowRight, Loader2, Link } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { Club } from '@/lib/data';
 import { allClubs } from '@/lib/data';
 import { generateClubQuestionAction, filterClubsAction } from '../actions';
 import { useToast } from '@/hooks/use-toast';
+import { redirect } from 'next/navigation';
 
 type Question = {
   id: string;
@@ -221,26 +222,25 @@ export default function ClubFinderPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence>
-                {clubsToShow.map(club => (
+                {clubsToShow.map((club, id) => (
                     <motion.div
-                        key={club.name}
+                        key={id}
                         layout
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         transition={{ duration: 0.3 }}
+                        onClick={() => window.open(`https://campusgroups.rit.edu/feeds?type=club&type_id=${club.id}&tab=about`, "_blank")}
                     >
-                        <Card className="h-full flex flex-col">
-                            <CardHeader>
-                                <CardTitle>{club.name}</CardTitle>
-                            </CardHeader>
+                        <Card className="h-full flex flex-col cursor-pointer hover:bg-gray-100">
+                            <div className='flex items-center -space-x-4 ml-6'>
+                              <Link width={14}/>
+                              <CardHeader>
+                                  <CardTitle className='text-xl'>{club.name}</CardTitle>
+                              </CardHeader>
+                            </div>
                             <CardContent className="flex-grow">
                                 <p className="text-muted-foreground">{club.description}</p>
-                                <div className="flex flex-wrap gap-2 mt-4">
-                                    {club.tags.map(tag => (
-                                        <Badge key={tag} variant="secondary">{tag}</Badge>
-                                    ))}
-                                </div>
                             </CardContent>
                         </Card>
                     </motion.div>
