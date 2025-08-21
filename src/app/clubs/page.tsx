@@ -133,7 +133,7 @@ export default function ClubFinderPage() {
                 <AnimatePresence>
                     {clubs.map((club, id) => (
                         <motion.div
-                            key={club.id}
+                            key={id}
                             layout
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
