@@ -1,163 +1,71 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Users, RotateCw, List, ArrowRight, Loader2, Link } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Users, Search, RotateCw, List, Loader2, Link as LinkIcon } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import type { Club } from '@/lib/data';
-import { allClubs } from '@/lib/data';
-import { generateClubQuestionAction, filterClubsAction } from '../actions';
+import { allClubs, type Club } from '@/lib/data';
+import { findClubsAction } from '../actions';
 import { useToast } from '@/hooks/use-toast';
-import { redirect } from 'next/navigation';
-
-type Question = {
-  id: string;
-  text: string;
-  options: { value: string; label: string }[];
-};
-
-type HistoryItem = {
-    question: string;
-    answers: string[];
-}
-
-const defaultQuestions: Question[] = [
-  {
-    id: 'interest_type',
-    text: 'What kind of activities are you looking for? (Select one or more)',
-    options: [
-      { value: 'academic', label: 'Academic or Professional' },
-      { value: 'creative', label: 'Artistic or Creative' },
-      { value: 'physical', label: 'Sports or Physical Activity' },
-      { value: 'social', label: 'Social or Hobby-based' },
-    ],
-  },
-  {
-    id: 'commitment_level',
-    text: 'How would you describe your ideal club environment? (Select one or more)',
-    options: [
-      { value: 'professional', label: 'Career-focused and professional' },
-      { value: 'tech', label: 'Technology-oriented' },
-      { value: 'artistic', label: 'Creative and performance-based' },
-      { value: 'social', label: 'Casual and social' },
-    ],
-  },
-];
+import { useProfile } from '@/hooks/use-profile';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import Link from 'next/link';
 
 export default function ClubFinderPage() {
   const { toast } = useToast();
+  const { profile, isProfileLoaded } = useProfile();
+  
+  const [query, setQuery] = useState('');
   const [clubs, setClubs] = useState<Club[]>(allClubs);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [questions, setQuestions] = useState<Question[]>(defaultQuestions);
-  const [quizFinished, setQuizFinished] = useState(false);
-  const [showAll, setShowAll] = useState(false);
-  const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const currentQuestion = !quizFinished ? questions[currentQuestionIndex] : null;
-
-  useEffect(() => {
-    if (quizFinished) return;
-    
-    if (clubs.length < 16 && clubs.length > 0) {
-      setQuizFinished(true);
+  const handleSearch = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!query) {
+      setError('Please enter a search query.');
       return;
     }
-
-    if (currentQuestionIndex >= defaultQuestions.length) {
-        generateNextQuestion();
+    if (!profile.degreeProgram && !profile.year && !profile.interests) {
+      setError('Please complete your profile for better search results.');
+      // We can still allow search, but it's less effective
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentQuestionIndex, clubs, quizFinished]);
 
-  const generateNextQuestion = async () => {
     setLoading(true);
-    const response = await generateClubQuestionAction({ clubs, history });
-    if (response.success && response.data) {
-      const newQuestion: Question = {
-        id: `ai-q-${questions.length}`,
-        text: response.data.questionText,
-        options: response.data.options,
-      };
-      setQuestions(prev => [...prev, newQuestion]);
-    } else {
-      toast({
-        title: 'Error generating question',
-        description: response.error,
-        variant: 'destructive',
-      });
-      setQuizFinished(true); // End quiz if we can't generate a question
-    }
-    setLoading(false);
-  };
+    setError(null);
+    setHasSearched(true);
 
-  const handleSelectionChange = (value: string) => {
-    setSelectedAnswers(prev => 
-      prev.includes(value) ? prev.filter(t => t !== value) : [...prev, value]
-    );
-  };
-
-  const handleNextQuestion = async () => {
-    if (!currentQuestion) return;
-    setLoading(true);
-
-    const currentHistoryItem: HistoryItem = {
-        question: currentQuestion.text,
-        answers: selectedAnswers,
-    };
-
-    const response = await filterClubsAction({
-        clubs,
-        question: currentQuestion.text,
-        answers: selectedAnswers,
-    });
-
-    setHistory(prev => [...prev, currentHistoryItem]);
-
-    if(response.success && response.data) {
-        setClubs(response.data);
-    } else {
-        toast({
-            title: 'Error filtering clubs',
-            description: response.error,
-            variant: 'destructive',
-        });
-    }
-
-    setSelectedAnswers([]);
+    const response = await findClubsAction({ ...profile, query });
     
-    if (currentQuestionIndex + 1 < questions.length || clubs.length >= 16) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    if (response.success && response.data) {
+        const matchingClubNames = new Set(response.data.map(c => c.name));
+        const filteredClubs = allClubs.filter(club => matchingClubNames.has(club.name));
+        setClubs(filteredClubs);
     } else {
-      setQuizFinished(true);
+        setError(response.error || 'An unexpected error occurred.');
+        setClubs([]);
     }
+
     setLoading(false);
   };
 
-  const resetQuiz = () => {
+  const resetSearch = () => {
     setClubs(allClubs);
-    setCurrentQuestionIndex(0);
-    setQuestions(defaultQuestions);
-    setQuizFinished(false);
-    setShowAll(false);
-    setSelectedAnswers([]);
-    setHistory([]);
-    setLoading(false);
+    setQuery('');
+    setHasSearched(false);
+    setError(null);
   };
 
-  const handleShowAll = () => {
-    setClubs(allClubs);
-    setShowAll(true);
-    setQuizFinished(true);
-  };
-  
-  const clubsToShow = showAll ? allClubs : clubs;
+  if (!isProfileLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center p-4 sm:p-6 md:p-8">
@@ -166,86 +74,94 @@ export default function ClubFinderPage() {
           <Users className="h-10 w-10 text-primary" />
           <h1 className="text-4xl md:text-5xl font-bold text-primary tracking-tight">Club Finder</h1>
         </div>
-        <p className="text-lg text-foreground/80">Answer a few questions to find your community at RIT.</p>
+        <p className="text-lg text-foreground/80">Describe what you're looking for to find your community at RIT.</p>
+         {!profile.degreeProgram && !profile.year && !profile.interests && (
+          <Alert className="mt-4 text-left">
+            <AlertTitle>Complete Your Profile!</AlertTitle>
+            <AlertDescription>
+              For the best recommendations, please{' '}
+              <Link href="/profile" className="font-semibold text-primary hover:underline">
+                fill out your profile
+              </Link>{' '}
+              with your interests and academic info.
+            </AlertDescription>
+          </Alert>
+        )}
       </header>
       
       <main className="w-full max-w-4xl space-y-8">
-        {!quizFinished && currentQuestion && (
-          <Card>
+        <Card>
+          <form onSubmit={handleSearch}>
             <CardHeader>
-              <CardTitle>Question {currentQuestionIndex + 1}</CardTitle>
-              <CardDescription>{currentQuestion.text}</CardDescription>
+              <CardTitle>Find Your Club</CardTitle>
+              <CardDescription>Tell us what you're interested in. e.g., "competitive programming clubs" or "hiking and outdoors"</CardDescription>
             </CardHeader>
             <CardContent>
-              {loading && currentQuestionIndex >= defaultQuestions.length ? (
-                 <div className="flex items-center justify-center p-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="ml-4 text-muted-foreground">Generating question...</p>
-                 </div>
-              ) : (
-                <>
-                  <div className="space-y-4">
-                    {currentQuestion.options.map(option => (
-                      <div key={option.value} className="flex items-center space-x-3">
-                        <Checkbox
-                          id={option.value}
-                          checked={selectedAnswers.includes(option.value)}
-                          onCheckedChange={() => handleSelectionChange(option.value)}
-                        />
-                        <Label htmlFor={option.value} className="text-base font-normal cursor-pointer">
-                          {option.label}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex justify-end mt-6">
-                    <Button onClick={handleNextQuestion} disabled={selectedAnswers.length === 0 || loading}>
-                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {loading ? 'Filtering...' : <>Next <ArrowRight className="ml-2" /></>}
-                    </Button>
-                  </div>
-                </>
-              )}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input 
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Describe your ideal club..."
+                  className="pl-10 text-base" 
+                />
+              </div>
             </CardContent>
-          </Card>
+            <CardContent className="flex justify-between items-center">
+              <Button variant="outline" type="button" onClick={resetSearch}><RotateCw className="mr-2" /> Reset</Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+                {loading ? 'Searching...' : 'Search'}
+              </Button>
+            </CardContent>
+          </form>
+        </Card>
+
+        {error && (
+            <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+            </Alert>
         )}
 
-        <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">
-              {quizFinished ? `Your Recommendations (${clubsToShow.length})` : `All Clubs (${allClubs.length})`}
+        <div>
+            <h2 className="text-2xl font-bold mb-4">
+              {hasSearched ? `Matching Clubs (${clubs.length})` : `All Clubs (${allClubs.length})`}
             </h2>
-            <div className="flex gap-2">
-                <Button variant="outline" onClick={resetQuiz}><RotateCw className="mr-2" /> Reset</Button>
-                {!showAll && quizFinished && <Button variant="outline" onClick={handleShowAll}><List className="mr-2" /> Show All</Button>}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <AnimatePresence>
+                    {clubs.map((club, id) => (
+                        <motion.div
+                            key={club.id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 0.3 }}
+                            onClick={() => window.open(`https://campusgroups.rit.edu/feeds?type=club&type_id=${club.id}&tab=about`, "_blank")}
+                        >
+                            <Card className="h-full flex flex-col cursor-pointer transition-all hover:shadow-lg hover:border-primary/50">
+                                <CardHeader>
+                                    <CardTitle className='text-xl flex items-center gap-2'>
+                                      <LinkIcon size={16} className="text-primary/80"/>
+                                      {club.name}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex-grow">
+                                    <p className="text-muted-foreground">{club.description}</p>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
             </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <AnimatePresence>
-                {clubsToShow.map((club, id) => (
-                    <motion.div
-                        key={id}
-                        layout
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.3 }}
-                        onClick={() => window.open(`https://campusgroups.rit.edu/feeds?type=club&type_id=${club.id}&tab=about`, "_blank")}
-                    >
-                        <Card className="h-full flex flex-col cursor-pointer hover:bg-gray-100">
-                            <div className='flex items-center -space-x-4 ml-6'>
-                              <Link width={14}/>
-                              <CardHeader>
-                                  <CardTitle className='text-xl'>{club.name}</CardTitle>
-                              </CardHeader>
-                            </div>
-                            <CardContent className="flex-grow">
-                                <p className="text-muted-foreground">{club.description}</p>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                ))}
-            </AnimatePresence>
+            {hasSearched && clubs.length === 0 && !loading && (
+                <div className="text-center py-12">
+                    <p className="text-lg text-muted-foreground">No clubs found matching your search.</p>
+                    <p className="text-sm text-muted-foreground mt-2">Try a different search term or reset to see all clubs.</p>
+                </div>
+            )}
         </div>
       </main>
     </div>
