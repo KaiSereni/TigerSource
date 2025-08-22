@@ -72,7 +72,7 @@ const findClubsFlow = ai.defineFlow(
     const { output } = await findClubsPrompt({
         ...input,
         clubs: allClubs
-    });
+    } as any);
     return output!;
   }
 );
