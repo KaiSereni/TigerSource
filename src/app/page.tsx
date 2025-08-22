@@ -171,7 +171,7 @@ export default function TigerSourcePage() {
           <img src={tiger.src} className="h-10 w-10 text-primary" />
           <h1 className="text-4xl md:text-5xl font-bold text-primary tracking-tight">TigerSource</h1>
         </div>
-        <p className="text-lg text-foreground/80">Your AI-powered guide to RIT resources.</p>
+        <p className="text-lg text-foreground/80">Your AI-powered guide to RIT resources.<br/>This website is in no way affiliated with RIT, it was created independently by a student.</p>
         {!profile.degreeProgram && !profile.year && !profile.interests && (
           <Alert className="mt-4 text-left">
             <AlertTitle>Welcome!</AlertTitle>

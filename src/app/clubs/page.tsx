@@ -94,7 +94,7 @@ export default function ClubFinderPage() {
           <form onSubmit={handleSearch}>
             <CardHeader>
               <CardTitle>Find Your Club</CardTitle>
-              <CardDescription>Tell us what you're interested in. e.g., "competitive programming clubs" or "hiking and outdoors"</CardDescription>
+              <CardDescription>Tell the model what you're interested in. e.g., "competitive programming clubs" or "hiking and outdoors"</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="relative">

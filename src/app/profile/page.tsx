@@ -44,7 +44,7 @@ export default function ProfilePage() {
         <Card>
           <CardHeader>
             <CardTitle>Profile Details</CardTitle>
-            <CardDescription>Your information is stored in your browser and is not shared.</CardDescription>
+            <CardDescription>Your information is stored in your browser and is not shared except within prompts, which are deleted immediately after use.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
