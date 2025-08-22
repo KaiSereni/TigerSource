@@ -2669,8 +2669,25 @@ export type Resource = {
 };
 
 export const allResources: Resource[] = [
-    { name: 'My RIT', link: 'https://my.rit.edu', description: 'A personalized dashboard for accessing RIT resources.' },
-    { name: 'SIS', link: 'https://sis.rit.edu', description: 'The Student Information System for managing academic records.' },
-    { name: 'StarRez', link: 'https://starrez.rit.edu', description: 'The housing portal for on-campus living.' },
+    { name: 'Infocenter', link: 'https://www.rit.edu/infocenter/', description: "A directory of links for resources regarding student information, financial aid, calendars, and troubleshooting"},
+    { name: 'SIS', link: 'https://campus.ps.rit.edu/', description: 'A student dashboard for managing academic records, class enrollments, and advisor information' },
+    { name: 'My RIT', link: 'https://my.rit.edu', description: 'A page containing your UID, a link to college-specific resources and a link to university-wide resources.' },
     { name: 'CampusGroups', link: 'https://campusgroups.rit.edu', description: 'A platform for finding clubs and campus events.' },
+    { name: 'University-wide resources', link: 'https://www.rit.edu/myrit/university-wide-resources-students', description: "A list of links to academic, career, financial, safety, major change, credit transfer and wellness information, as well as change of address, legal name and, perferred name"},
+    { name: 'College-specific resources', link: 'https://www.rit.edu/myrit/college-specific-resources-students', description: "Links to department and school web pages, lost & found, academic advising, co-op and career services, and club pages."},
+    { name: 'Virtual orientation', link: "https://virtualorientation.rit.edu/", description: "An orientation portal for freshman" },
+    { name: 'RIT Google Workspace', link: 'https://www.rit.edu/google/', description: "Google workspace resources such as gmail, docs, and drive"},
+    { name: 'MFA Guide', link: 'https://www.rit.edu/its/multi-factor-authentication-mfa', description: "A guide to setting up multi-factor authentication to improve your account security" },
+    { name: "RIT Mail", link: 'https://ritmail.rit.edu/sympa', description: "Choose to unsubscribe or subscribe to RIT mailing list categories." },
+    { name: "RESNET", link: 'https://www.rit.edu/its/resnet/students', description: "Free computer repair and network access help, tech consulting, virus removal, general tech help" },
+    { name: "Academic Calendar", link: 'https://www.rit.edu/calendar', description: "A list of dates regarding when different sections of the year start and end, such as add/drop periods, holidays, and exam weeks"},
+    { name: "Undergrad and grad catalog downloads", link: 'https://www.rit.edu/study/undergraduate-and-graduate-catalogs', description: "Links to download PDF class catalogs"},
+    { name: "New student info", link: "https://www.rit.edu/advising/new-student-information", description: "Information regarding registering for classes, AP score and transfer credit, course textbooks, major plan of study, and adademic advisement report"},
+    { name: "eServices", link: "https://eservices.rit.edu/eservices/home", description: "The student dashboard for managing bill pay, scholarships, financial aid, financial services, and giving outside accounts (such as your parents) access to financial and GPA info"},
+    { name: "Career Connect", link: "https://rit-csm.symplicity.com/students/app/home", description: "A job search and application site (similar to Linkedin) where students can find jobs (on and off campus), connect with employers, and find career events"},
+    { name: "Enrollment Checklist", link: "https://join.rit.edu/portal/appstatus_ugrd?tab=enrollment-checklist", description: "A checklist for admitted students containing what they need to do before and when they arrive"},
+    { name: "Starfish", link: "https://rit.starfishsolutions.com/starfish-ops/student/dashboard.html", description: "Student success support network and course planning"},
+    { name: "MyCourses", link: "https://mycourses.rit.edu/d2l/home", description: "A dashboard for students similar to Google Classroom or Canvas that lists active courses, assignments for those courses, and resources for those assignments."},
+    { name: "MyLife", link: "http://mylife.rit.edu/", description: "Housing application, dining application, housing assignment info, awards/volunteering info, forms, and maintenence tickets"},
+    { name: "TigerSpend", link: "https://tigerspend.rit.edu/", description: "Dashboard for managing student meals credits including making a deposit, checking account statements, and managing funds"}
 ];
