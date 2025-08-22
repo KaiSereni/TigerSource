@@ -45,5 +45,3 @@ firebase-debug.log
 firestore-debug.log
 *.cache
 genkit-config.json
-apphosting.yaml
-apphosting.emulator.yaml

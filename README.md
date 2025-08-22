@@ -2,16 +2,7 @@
 This is an open-source repository designed to help RIT students find the resources they need for a given task, as well as to look for clubs. Tigersource has no affiliation with RIT.
 
 ## Quickstart
-Get a Google Gemini API key, create a `apphosting.emulator.yaml` file in the `/functions` directory, and set the property as specified below.<br>
-### Example apphosting.emulator.yaml:
-```
-runConfig:
-  cpu: 1
-  memoryMiB: 1024
-env:
-  - variable: GEMINI_API_KEY
-    value: [GEMINI KEY GOES HERE]
-```
+Get a Google Gemini API key, create a `.env` file in the `/functions` directory, and set `GEMINI_API_KEY=[Your key]`.<br>
 To get started, run `npm i` followed by `npm run emulate`.
 
 ## Note:

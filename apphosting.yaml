@@ -1,0 +1,8 @@
+runConfig:
+  cpu: 1
+  memoryMiB: 1024
+env:
+  - variable: GEMINI_API_KEY
+    secret: GEMINI_API_KEY
+  - variable: NEXT_PUBLIC_SITE_KEY
+    value: 6LcG164rAAAAADLnW9nRObpF4RYF79aY8248LAB1

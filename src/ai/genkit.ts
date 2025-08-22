@@ -5,6 +5,6 @@ import { enableFirebaseTelemetry } from '@genkit-ai/firebase';
 enableFirebaseTelemetry();
 
 export const ai = genkit({
-  plugins: [googleAI()],
+  plugins: [googleAI({apiKey: process.env.GEMINI_API_KEY})],
   model: 'googleai/gemini-2.0-flash',
 });
