@@ -1,5 +1,6 @@
+runConfig:
+  cpu: 1
+  memoryMiB: 1024
 env:
-#- variable: ENV_VAR_NAME
-#  value: plaintext value
-#- variable: SECRET_ENV_VAR_NAME
-#  secret: cloud-secret-manager-id
+  - variable: GEMINI_API_KEY
+    value: [PASTE YOUR GEMINI KEY HERE]
