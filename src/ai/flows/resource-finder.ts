@@ -1,13 +1,5 @@
 'use server';
 
-/**
- * @fileOverview An AI resource finder for RIT. It leverages user profile information as context to locate relevant RIT resources based on the user's query.
- *
- * - resourceFinder - A function that handles the resource finding process.
- * - ResourceFinderInput - The input type for the resourceFinder function.
- * - ResourceFinderOutput - The return type for the resourceFinder function.
- */
-
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { allResources } from '@/lib/data';

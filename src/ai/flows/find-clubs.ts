@@ -58,7 +58,9 @@ const findClubsPrompt = ai.definePrompt({
       Description: {{this.description}}
     {{/each}}
 
-    Based on the user's query and their profile, identify the clubs that are the best fit. Provide a list of matching clubs and a brief reason for each recommendation. Consider how a club's description aligns with the user's explicit query and implicit interests from their profile.
+    Based on the user's query and their profile, identify the clubs that are the best fit. \
+    Provide a list of matching clubs. Consider how a club's description aligns with the user's explicit query and implicit interests from their profile. \
+    If the user lists multiple interests, don't exclude clubs that only align with one of them.
     `
 });
 
