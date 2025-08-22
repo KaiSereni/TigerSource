@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { Search, Star, Send, ExternalLink, Loader2, PlusCircle } from 'lucide-react';
+import { Search, Star, Send, ExternalLink, Loader2, PlusCircle, Github } from 'lucide-react';
 import tiger from "@/assets/Roaring Tiger_rgb.png"
+import github from '@/assets/github.svg'
 
 import type { ResourceFinderOutput } from '@/ai/flows/resource-finder';
 import type { ImproveSearchInput } from '@/ai/flows/improve-search';
@@ -171,7 +172,7 @@ export default function TigerSourcePage() {
           <img src={tiger.src} className="h-10 w-10 text-primary" />
           <h1 className="text-4xl md:text-5xl font-bold text-primary tracking-tight">TigerSource</h1>
         </div>
-        <p className="text-lg text-foreground/80">Your AI-powered guide to RIT resources.<br/>This website is in no way affiliated with RIT, it was created independently by a student.</p>
+        <p className="text-lg text-foreground/80">Your AI-powered guide to RIT resources.<br/>This website is in no way affiliated with RIT, it was created independently by a student.<br/><div className='flex w-full justify-center space-x-1.5'><img width={16} src={github.src} className='mr-2'/> This project is open-source, view or fork the code <a className='underline text-blue-600' target='_blank' href='https://github.com/KaiSereni/TigerSource'>here</a></div></p>
         {!profile.degreeProgram && !profile.year && !profile.interests && (
           <Alert className="mt-4 text-left">
             <AlertTitle>Welcome!</AlertTitle>
