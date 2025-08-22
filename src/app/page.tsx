@@ -5,10 +5,10 @@ import { Search, Star, Send, ExternalLink, Loader2, PlusCircle, Github } from 'l
 import tiger from "@/assets/Roaring Tiger_rgb.png"
 import github from '@/assets/github.svg'
 
-import type { ResourceFinderOutput } from '@/ai/flows/resource-finder';
 import type { ImproveSearchInput } from '@/ai/flows/improve-search';
 import { findResourceAction, submitFeedbackAction } from './actions';
 import { useProfile } from '@/hooks/use-profile';
+import { allResources, type Resource } from '@/lib/data';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,7 +52,7 @@ export default function TigerSourcePage() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<ResourceFinderOutput | null>(null);
+  const [results, setResults] = useState<Resource[] | null>(null);
 
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackRating, setFeedbackRating] = useState(0);
@@ -76,7 +76,7 @@ export default function TigerSourcePage() {
 
     setLoading(true);
     setError(null);
-    setResult(null);
+    setResults(null);
     setFeedbackSubmitted(false);
     setFeedbackText('');
     setFeedbackRating(0);
@@ -84,7 +84,9 @@ export default function TigerSourcePage() {
     const response = await findResourceAction({ ...profile, query });
 
     if (response.data && response.success) {
-      setResult(response.data);
+      const excludedResourceNames = new Set(response.data.excludedResources);
+      const filteredResources = allResources.filter(resource => !excludedResourceNames.has(resource.name));
+      setResults(filteredResources);
     } else {
       setError(response.error || "Error");
     }
@@ -102,11 +104,11 @@ export default function TigerSourcePage() {
       return;
     }
     
-    if (!result) return;
+    if (!results) return;
 
     const feedbackInput: ImproveSearchInput = {
       query,
-      results: JSON.stringify(result),
+      results: JSON.stringify(results),
       feedback: feedbackText,
       rating: feedbackRating,
     };
@@ -234,21 +236,31 @@ export default function TigerSourcePage() {
              </Alert>
           )}
 
-          {result && !loading && (
+          {results && !loading && (
             <>
-              <Card>
-                <CardHeader>
-                  <CardTitle>{result.resourceName}</CardTitle>
-                  <CardDescription>{result.description}</CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Button asChild variant="outline" className="ml-auto">
-                    <a href={result.resourceLink} target="_blank" rel="noopener noreferrer">
-                      Visit Resource <ExternalLink className="ml-2 h-4 w-4" />
-                    </a>
-                  </Button>
-                </CardFooter>
-              </Card>
+              {results.map((resource, index) => (
+                <Card key={index}>
+                  <CardHeader>
+                    <CardTitle>{resource.name}</CardTitle>
+                    <CardDescription>{resource.description}</CardDescription>
+                  </CardHeader>
+                  <CardFooter>
+                    <Button asChild variant="outline" className="ml-auto">
+                      <a href={resource.link} target="_blank" rel="noopener noreferrer">
+                        Visit Resource <ExternalLink className="ml-2 h-4 w-4" />
+                      </a>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+
+              {results.length === 0 && (
+                <Card>
+                  <CardContent className="pt-6">
+                    <p className="text-center text-muted-foreground">No resources found matching your search.</p>
+                  </CardContent>
+                </Card>
+              )}
 
               <Card>
                 <Collapsible open={isSuggestionOpen} onOpenChange={setIsSuggestionOpen}>

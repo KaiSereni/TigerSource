@@ -41,8 +41,8 @@ export default function ClubFinderPage() {
     const response = await findClubsAction({ ...profile, query });
     
     if (response.success && response.data) {
-        const matchingClubNames = new Set(response.data.map(c => c.name));
-        const filteredClubs = allClubs.filter(club => matchingClubNames.has(club.name));
+        const excludedClubNames = new Set(response.data);
+        const filteredClubs = allClubs.filter(club => !excludedClubNames.has(club.name));
         setClubs(filteredClubs);
     } else {
         setError(response.error || 'An unexpected error occurred.');

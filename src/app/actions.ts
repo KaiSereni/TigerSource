@@ -27,7 +27,7 @@ export async function submitFeedbackAction(input: ImproveSearchInput) {
 export async function findClubsAction(input: FindClubsInput) {
     try {
         const result = await findClubs(input);
-        return { success: true, data: result.matchingClubs };
+        return { success: true, data: result.excludedClubs };
     } catch (error) {
         console.error('Error in findClubsAction:', error);
         return { success: false, error: 'Failed to find clubs. Please try again.' };

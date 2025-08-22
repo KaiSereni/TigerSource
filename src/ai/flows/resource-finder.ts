@@ -1,8 +1,8 @@
 'use server';
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-import { allResources } from '@/lib/data';
+import {z} from 'zod';
+import { allResources, type Resource } from '@/lib/data';
 
 const ResourceFinderInputSchema = z.object({
   query: z.string().describe('The user query to find RIT resources.'),
@@ -13,9 +13,7 @@ const ResourceFinderInputSchema = z.object({
 export type ResourceFinderInput = z.infer<typeof ResourceFinderInputSchema>;
 
 const ResourceFinderOutputSchema = z.object({
-  resourceName: z.string().describe('The name of the RIT resource.'),
-  resourceLink: z.string().describe('The link to the RIT resource.'),
-  description: z.string().describe('A brief description of the RIT resource.'),
+  excludedResources: z.array(z.string()).describe('A list of resource names that are not relevant to the user\'s query and should be excluded from the results.'),
 });
 export type ResourceFinderOutput = z.infer<typeof ResourceFinderOutputSchema>;
 
@@ -25,21 +23,23 @@ export async function resourceFinder(input: ResourceFinderInput): Promise<Resour
 
 const resourceFinderPrompt = ai.definePrompt({
   name: 'resourceFinderPrompt',
-  input: {schema: ResourceFinderInputSchema},
+  input: {schema: z.object({ ...ResourceFinderInputSchema.shape, resources: z.array(z.object({name: z.string(), description: z.string()})) })},
   output: {schema: ResourceFinderOutputSchema},
-  prompt: `You are an AI resource finder for RIT. You will use the user's query and profile information to locate the right RIT resource. You will provide the name of the resource, the link to the resource, and a brief description of the resource.
+  prompt: `You are an AI resource filter for Rochester Institute of Technology (RIT). Your task is to analyze a user's query and profile information to determine which resources from a provided list are NOT relevant to them.
 
-  User Query: {{{query}}}
-  Degree Program: {{{degreeProgram}}}
-  Year: {{{year}}}
-  Interests: {{{interests}}}
+  User Profile:
+  - Query: {{{query}}}
+  - Degree Program: {{{degreeProgram}}}
+  - Year: {{{year}}}
+  - Interests: {{{interests}}}
 
-  Consider the following RIT resources:
+  Here is the complete list of available resources:
   {{#each resources}}
-  - {{name}}: {{link}}, {{description}}
+  - Name: {{this.name}}
+    Description: {{this.description}}
   {{/each}}
 
-  Based on the user query and profile information, determine the best RIT resource for the user.
+  Based on the user's query and profile, identify all the resources that are NOT a good fit. Return a list of the names of these irrelevant resources to be excluded. If all resources seem relevant, return an empty list.
   `,
 });
 
@@ -52,8 +52,8 @@ const resourceFinderFlow = ai.defineFlow(
   async input => {
     const {output} = await resourceFinderPrompt({
         ...input,
-        resources: allResources,
-    } as any);
+        resources: allResources.map(({name, description}) => ({name, description})),
+    });
     return output!;
   }
 );
