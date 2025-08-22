@@ -13,7 +13,7 @@ const ResourceFinderInputSchema = z.object({
 export type ResourceFinderInput = z.infer<typeof ResourceFinderInputSchema>;
 
 const ResourceFinderOutputSchema = z.object({
-  excludedResources: z.array(z.string()).describe('A list of resource names that are not relevant to the user\'s query and should be excluded from the results.'),
+  includedResources: z.array(z.string()).describe('A list of resource names that are relevant to the user\'s query and should be included in the results.'),
 });
 export type ResourceFinderOutput = z.infer<typeof ResourceFinderOutputSchema>;
 
@@ -25,7 +25,7 @@ const resourceFinderPrompt = ai.definePrompt({
   name: 'resourceFinderPrompt',
   input: {schema: z.object({ ...ResourceFinderInputSchema.shape, resources: z.array(z.object({name: z.string(), description: z.string()})) })},
   output: {schema: ResourceFinderOutputSchema},
-  prompt: `You are an AI resource filter for Rochester Institute of Technology (RIT). Your task is to analyze a user's query and profile information to determine which resources from a provided list are NOT relevant to them.
+  prompt: `You are an AI resource filter for Rochester Institute of Technology (RIT). Your task is to analyze a user's query and profile information to determine which resources from a provided list are relevant to them.
 
   User Profile:
   - Query: {{{query}}}
@@ -39,7 +39,7 @@ const resourceFinderPrompt = ai.definePrompt({
     Description: {{this.description}}
   {{/each}}
 
-  Based on the user's query and profile, identify all the resources that are NOT a good fit. Return a list of the names of these irrelevant resources to be excluded. If all resources seem relevant, return an empty list.
+  Based on the user's query and profile, identify all the resources that ARE a good fit. Return a list of the names of these relevant resources to be included. If no resources seem relevant, return an empty list.
   `,
 });
 
