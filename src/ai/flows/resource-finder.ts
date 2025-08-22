@@ -6,9 +6,9 @@ import { allResources, type Resource } from '@/lib/data';
 
 const ResourceFinderInputSchema = z.object({
   query: z.string().describe('The user query to find RIT resources.'),
-  degreeProgram: z.string().describe('The user\u0027s degree program at RIT.'),
-  year: z.string().describe('The user\u0027s year of study (e.g., Freshman, Sophomore, etc.).'),
-  interests: z.string().describe('The user\u0027s specific interests at RIT.'),
+  degreeProgram: z.string().optional().describe('The user\u0027s degree program at RIT.'),
+  year: z.string().optional().describe('The user\u0027s year of study (e.g., Freshman, Sophomore, etc.).'),
+  interests: z.string().optional().describe('The user\u0027s specific interests at RIT.'),
 });
 export type ResourceFinderInput = z.infer<typeof ResourceFinderInputSchema>;
 
@@ -27,11 +27,14 @@ const resourceFinderPrompt = ai.definePrompt({
   output: {schema: ResourceFinderOutputSchema},
   prompt: `You are an AI resource filter for Rochester Institute of Technology (RIT). Your task is to analyze a user's query and profile information to determine which resources from a provided list are relevant to them.
 
+  User's Query: {{{query}}}
+
+  {{#if degreeProgram}}
   User Profile:
-  - Query: {{{query}}}
   - Degree Program: {{{degreeProgram}}}
   - Year: {{{year}}}
   - Interests: {{{interests}}}
+  {{/if}}
 
   Here is the complete list of available resources:
   {{#each resources}}
@@ -57,3 +60,5 @@ const resourceFinderFlow = ai.defineFlow(
     return output!;
   }
 );
+
+    

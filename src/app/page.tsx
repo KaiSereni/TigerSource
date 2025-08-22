@@ -69,10 +69,6 @@ export default function TigerSourcePage() {
       setError('Please enter a search query.');
       return;
     }
-     if (!profile.degreeProgram && !profile.year && !profile.interests) {
-      setError('Please complete your profile before searching for resources.');
-      return;
-    }
 
     setLoading(true);
     setError(null);
@@ -177,13 +173,13 @@ export default function TigerSourcePage() {
         <div className="text-lg text-foreground/80"><p>Your AI-powered guide to RIT resources.</p><p>This website is in no way affiliated with RIT, it was created independently by a student.</p><div className='w-full justify-center space-x-1.5'>This project is open-source, view or fork the code <a className='underline text-blue-600' target='_blank' href='https://github.com/KaiSereni/TigerSource'>here</a></div></div>
         {!profile.degreeProgram && !profile.year && !profile.interests && (
           <Alert className="mt-4 text-left">
-            <AlertTitle>Welcome!</AlertTitle>
+            <AlertTitle>Get Better Results!</AlertTitle>
             <AlertDescription>
-              It looks like your profile is empty. Please{' '}
+              For the best recommendations, please{' '}
               <Link href="/profile" className="font-semibold text-primary hover:underline">
                 fill out your profile
               </Link>{' '}
-              to get personalized resource recommendations.
+              with your interests and academic info.
             </AlertDescription>
           </Alert>
         )}
@@ -338,3 +334,5 @@ export default function TigerSourcePage() {
     </div>
   );
 }
+
+    

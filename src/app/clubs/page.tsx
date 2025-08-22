@@ -29,10 +29,6 @@ export default function ClubFinderPage() {
       setError('Please enter a search query.');
       return;
     }
-    if (!profile.degreeProgram && !profile.year && !profile.interests) {
-      setError('Please complete your profile for better search results.');
-      // We can still allow search, but it's less effective
-    }
 
     setLoading(true);
     setError(null);
@@ -77,7 +73,7 @@ export default function ClubFinderPage() {
         <p className="text-lg text-foreground/80">Describe what you're looking for to find your community at RIT.</p>
          {!profile.degreeProgram && !profile.year && !profile.interests && (
           <Alert className="mt-4 text-left">
-            <AlertTitle>Complete Your Profile!</AlertTitle>
+            <AlertTitle>Get Better Results!</AlertTitle>
             <AlertDescription>
               For the best recommendations, please{' '}
               <Link href="/profile" className="font-semibold text-primary hover:underline">
@@ -167,3 +163,5 @@ export default function ClubFinderPage() {
     </div>
   );
 }
+
+    

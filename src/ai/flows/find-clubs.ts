@@ -38,10 +38,12 @@ const findClubsPrompt = ai.definePrompt({
     User's Search Query:
     "{{query}}"
 
+    {{#if degreeProgram}}
     User's Profile:
     - Degree Program: {{degreeProgram}}
     - Year: {{year}}
     - General Interests: {{interests}}
+    {{/if}}
 
     Here is the complete list of available clubs:
     {{#each clubs}}
@@ -67,3 +69,5 @@ const findClubsFlow = ai.defineFlow(
     return output!;
   }
 );
+
+    
